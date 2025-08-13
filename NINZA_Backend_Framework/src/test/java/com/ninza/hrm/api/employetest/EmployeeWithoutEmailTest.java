@@ -1,0 +1,58 @@
+package com.ninza.hrm.api.employetest;
+
+import static io.restassured.RestAssured.given;
+
+import org.testng.annotations.Test;
+
+import com.ninza.hrm.api.baseClass.BaseAPIClass;
+import com.ninza.hrm.api.genericUtility.FileUtility;
+import com.ninza.hrm.api.genericUtility.JavaUtility;
+import com.ninza.hrm.api.pojoclass.EmployeePOJO;
+import com.ninza.hrm.api.pojoclass.ProjectPOJO;
+
+import co.ninza.hrm.constants.endpoints.IEndpoint;
+import io.restassured.response.Response;
+
+
+public class EmployeeWithoutEmailTest extends BaseAPIClass{
+	
+	JavaUtility jlib = new JavaUtility();
+	FileUtility flib = new FileUtility();
+
+	@Test
+	public void addEmployeWithoutMailTest() throws Throwable {
+		
+		
+		String projectName = "Apple_"+jlib.getRandomNum();
+		String userName = "user"+jlib.getRandomNum();
+		
+		//API-1 ==> add project to server
+		ProjectPOJO pObj = new ProjectPOJO("deepak", projectName, "Created", 0);
+		 given()
+			.spec(reqSpecObj)
+			.body(pObj)
+		
+		.when()
+			.post(IEndpoint.ADDProj)
+		
+		.then()
+			.log().all();
+		
+		//API-2 Add Employee To same project
+		EmployeePOJO empPojo = new EmployeePOJO("Architect", "24/10/1999", "",
+												userName, 18, "7845129630", projectName, "ROLE_EMPLOYEE", userName);
+		Response res = given()
+			.spec(reqSpecObj)
+			.body(empPojo)
+			
+		.when()	
+			.post(IEndpoint.ADDEmp);
+			
+		res.then()
+			.assertThat().statusCode(500)
+			.and()
+			.spec(resSpecObj)
+			.log().all();
+
+	}
+}
